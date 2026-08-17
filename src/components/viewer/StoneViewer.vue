@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRef, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, toRef, watch } from 'vue'
 import ViewerControls from './ViewerControls.vue'
 import { useFullscreen } from '@/composables/useFullscreen'
 import { useViewerSession } from '@/composables/useViewerSession'
@@ -65,6 +65,25 @@ const cameraTarget = computed(() => props.item?.view?.cameraTarget || '0m 0m 0m'
 const fieldOfView = computed(() => props.item?.view?.fieldOfView || '30deg')
 const exposure = computed(() => props.item?.view?.exposure ?? 1)
 const shadowIntensity = computed(() => props.item?.view?.shadowIntensity ?? 0.8)
+const modelOrientation = ref('0deg 0deg 0deg')
+const interactiveFieldOfView = ref('30deg')
+const activePointers = new Map<number, { x: number; y: number }>()
+let pinchDistance: number | null = null
+let pointerCaptureTarget: HTMLElement | null = null
+
+const ORBIT_DEGREES_PER_PIXEL = 0.45
+const MIN_FIELD_OF_VIEW = 12
+const MAX_FIELD_OF_VIEW = 60
+
+watch(
+  [() => props.item?.id, fieldOfView],
+  ([, nextFieldOfView]) => {
+    interactiveFieldOfView.value = nextFieldOfView
+    modelOrientation.value = '0deg 0deg 0deg'
+    clearModelPointers()
+  },
+  { immediate: true },
+)
 
 function toggleAutoRotate(): void {
   autoRotate.value = !autoRotate.value
@@ -74,7 +93,113 @@ async function toggleFullscreen(): Promise<void> {
   await fullscreen.toggleFullscreen()
 }
 
-watch(phase, (nextPhase) => emit('phase-change', nextPhase), { immediate: true })
+function readDegrees(value: string): number {
+  const degrees = Number.parseFloat(value)
+  return Number.isFinite(degrees) ? degrees : 30
+}
+
+function updateOrientation(horizontalDelta: number, verticalDelta: number): void {
+  const orientationValues = modelOrientation.value.match(/-?\d+(?:\.\d+)?/g)?.map(Number) || [0, 0, 0]
+  const roll = orientationValues[0] || 0
+  const pitch = (orientationValues[1] || 0) + verticalDelta * ORBIT_DEGREES_PER_PIXEL
+  const yaw = (orientationValues[2] || 0) + horizontalDelta * ORBIT_DEGREES_PER_PIXEL
+  modelOrientation.value = `${roll}deg ${pitch}deg ${yaw}deg`
+}
+
+function updateFieldOfView(delta: number): void {
+  const nextFieldOfView = Math.min(
+    MAX_FIELD_OF_VIEW,
+    Math.max(MIN_FIELD_OF_VIEW, readDegrees(interactiveFieldOfView.value) + delta),
+  )
+  interactiveFieldOfView.value = `${nextFieldOfView}deg`
+}
+
+function getPinchDistance(): number | null {
+  if (activePointers.size < 2) return null
+
+  const [first, second] = [...activePointers.values()]
+  return Math.hypot(first.x - second.x, first.y - second.y)
+}
+
+function clearModelPointers(): void {
+  if (pointerCaptureTarget) {
+    for (const pointerId of activePointers.keys()) {
+      if (pointerCaptureTarget.hasPointerCapture?.(pointerId)) {
+        pointerCaptureTarget.releasePointerCapture(pointerId)
+      }
+    }
+  }
+
+  activePointers.clear()
+  pinchDistance = null
+  pointerCaptureTarget = null
+}
+
+function handleModelPointerDown(event: globalThis.PointerEvent): void {
+  if (phase.value !== 'ready') return
+  if (event.pointerType === 'mouse' && event.button !== 0) return
+
+  event.preventDefault()
+  autoRotate.value = false
+
+  const target = event.currentTarget
+  if (target instanceof HTMLElement) {
+    pointerCaptureTarget = target
+    target.setPointerCapture?.(event.pointerId)
+  }
+
+  activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
+  pinchDistance = getPinchDistance()
+}
+
+function handleModelPointerMove(event: globalThis.PointerEvent): void {
+  const previous = activePointers.get(event.pointerId)
+  if (!previous || phase.value !== 'ready') return
+
+  event.preventDefault()
+  const horizontalDelta = event.clientX - previous.x
+  const verticalDelta = event.clientY - previous.y
+  previous.x = event.clientX
+  previous.y = event.clientY
+
+  if (activePointers.size === 1) {
+    updateOrientation(horizontalDelta, verticalDelta)
+    return
+  }
+
+  const nextPinchDistance = getPinchDistance()
+  if (pinchDistance !== null && nextPinchDistance !== null) {
+    updateFieldOfView((pinchDistance - nextPinchDistance) * 0.035)
+  }
+  pinchDistance = nextPinchDistance
+}
+
+function finishModelPointer(event: globalThis.PointerEvent): void {
+  if (!activePointers.has(event.pointerId)) return
+
+  activePointers.delete(event.pointerId)
+  if (pointerCaptureTarget?.hasPointerCapture?.(event.pointerId)) {
+    pointerCaptureTarget.releasePointerCapture(event.pointerId)
+  }
+
+  pinchDistance = getPinchDistance()
+  if (activePointers.size === 0) pointerCaptureTarget = null
+}
+
+function handleModelWheel(event: globalThis.WheelEvent): void {
+  if (phase.value !== 'ready') return
+
+  event.preventDefault()
+  const pixels = event.deltaMode === globalThis.WheelEvent.DOM_DELTA_LINE ? event.deltaY * 16 : event.deltaY
+  updateFieldOfView(pixels * 0.025)
+}
+
+watch(phase, (nextPhase) => {
+  if (nextPhase !== 'ready') clearModelPointers()
+  emit('phase-change', nextPhase)
+}, { immediate: true })
+
+onBeforeUnmount(clearModelPointers)
 </script>
 
 <template>
@@ -86,9 +211,8 @@ watch(phase, (nextPhase) => emit('phase-change', nextPhase), { immediate: true }
     :aria-busy="phase === 'loading'"
   >
     <div class="viewer-stage">
-      <!-- Keep the complete orbit gesture on the model surface. `pan-y` lets
-           mobile browsers take over vertical drags for page scrolling, which
-           makes the model feel limited to left/right rotation. -->
+      <!-- Keep the complete orbit gesture on the model surface so both
+           horizontal yaw and unbounded vertical X-axis rotation accumulate. -->
       <model-viewer
         v-if="session.shouldMountModel.value"
         :ref="setViewerElement"
@@ -98,16 +222,22 @@ watch(phase, (nextPhase) => emit('phase-change', nextPhase), { immediate: true }
         :alt="props.item?.model.alt || ''"
         :camera-orbit="cameraOrbit"
         :camera-target="cameraTarget"
-        :field-of-view="fieldOfView"
+        :field-of-view="interactiveFieldOfView"
+        :orientation="modelOrientation"
         :exposure="exposure"
         :shadow-intensity="shadowIntensity"
         :auto-rotate="autoRotate ? '' : undefined"
         auto-rotate-delay="0"
         rotation-per-second="18deg"
-        camera-controls
         touch-action="none"
         loading="eager"
         reveal="auto"
+        @pointerdown="handleModelPointerDown"
+        @pointermove="handleModelPointerMove"
+        @pointerup="finishModelPointer"
+        @pointercancel="finishModelPointer"
+        @lostpointercapture="clearModelPointers"
+        @wheel="handleModelWheel"
       />
 
       <div v-if="phase === 'idle'" class="viewer-message viewer-message--idle">
