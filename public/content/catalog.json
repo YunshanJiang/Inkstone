@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "2026.08.16.2",
+  "generatedAt": "2026-08-16T03:33:46+08:00",
+  "items": [
+    {
+      "id": "YT-0001",
+      "title": "松花石云龙纹砚",
+      "itemUrl": "/content/items/YT-0001.json",
+      "keywords": ["砚台", "松花石", "云龙纹", "YT-0001"],
+      "sortOrder": 1
+    },
+    {
+      "id": "YT-0002",
+      "title": "松花石云龙纹砚",
+      "itemUrl": "/content/items/YT-0002.json",
+      "keywords": ["砚台", "松花石", "云龙纹", "YT-0002"],
+      "sortOrder": 2
+    }
+  ]
+}

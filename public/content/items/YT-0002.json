@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "YT-0002",
+  "name": "松花石云龙纹砚",
+  "introduction": [
+    "云龙纹饰，沉静如墨。",
+    "云龙纹饰盘绕砚面，石质温润沉静。",
+    "器形端雅，兼具实用与观赏价值。"
+  ],
+  "modelUrl": "/assets/models/YT-0002.glb",
+  "fallbackImage": "/assets/fallback/YT-0002.png",
+  "alt": "松花石云龙纹砚的三维模型",
+  "view": {
+    "cameraOrbit": "0deg 68deg 5m",
+    "cameraTarget": "0m 0m 0m",
+    "fieldOfView": "30deg",
+    "exposure": 1,
+    "shadowIntensity": 0.8
+  },
+  "metadata": {
+    "material": "松花石",
+    "period": "清代",
+    "dimensions": "18 × 13 × 3.5 cm",
+    "owner": "吉林松花石"
+  }
+}
