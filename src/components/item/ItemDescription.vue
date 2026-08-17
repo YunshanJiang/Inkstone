@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, type CSSProperties } from 'vue'
 import type { ItemDocument } from '@/domain/catalog/types'
+import { resolveAssetUrl } from '@/services/assetUrl'
 
 const props = defineProps<{
   item: ItemDocument | null
@@ -19,6 +20,7 @@ let activePointerId: number | null = null
 let dragStartY = 0
 let suppressClick = false
 let dragHandleElement: HTMLElement | null = null
+const panelAssetUrl = resolveAssetUrl('/assets/ui/Panel.png')
 
 const sheetStyle = computed<CSSProperties>(() => ({
   '--sheet-drag-offset': `${dragOffset.value}px`,
@@ -111,7 +113,7 @@ onBeforeUnmount(removePointerListeners)
       @click="handleClick"
       @pointerdown="handlePointerDown"
     >
-      <img class="sheet-handle" src="/assets/ui/Panel.png" alt="">
+      <img class="sheet-handle" :src="panelAssetUrl" alt="">
     </button>
 
     <template v-if="item">

@@ -1,4 +1,5 @@
 import { appConfig } from '@/app/config'
+import { resolveAssetUrl } from '@/services/assetUrl'
 import { parseCatalog, parseItem } from './parser'
 import { fetchJson } from '@/services/httpClient'
 import { readCatalogCache, writeCatalogCache } from '@/services/cache'
@@ -18,5 +19,5 @@ export async function loadCatalog(signal?: AbortSignal): Promise<{ document: Cat
 }
 
 export async function loadItem(summary: CatalogItemSummary, signal?: AbortSignal): Promise<ItemDocument> {
-  return parseItem(await fetchJson(summary.itemUrl, signal), summary.id)
+  return parseItem(await fetchJson(resolveAssetUrl(summary.itemUrl), signal), summary.id)
 }

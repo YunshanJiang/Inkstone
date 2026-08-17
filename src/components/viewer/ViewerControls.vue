@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { resolveAssetUrl } from '@/services/assetUrl'
+
 defineProps<{
   autoRotate: boolean
   fullscreen: boolean
@@ -13,6 +15,11 @@ const emit = defineEmits<{
   previous: []
   next: []
 }>()
+
+const previousAssetUrl = resolveAssetUrl('/assets/ui/SwitchLeft.png')
+const autoRotateAssetUrl = resolveAssetUrl('/assets/ui/autoRotate.png')
+const fullscreenAssetUrl = resolveAssetUrl('/assets/ui/FullScreen.png')
+const nextAssetUrl = resolveAssetUrl('/assets/ui/SwitchRight.png')
 </script>
 
 <template>
@@ -31,7 +38,7 @@ const emit = defineEmits<{
         title="上一方"
         @click="emit('previous')"
       >
-        <img class="control-button__asset" src="/assets/ui/SwitchLeft.png" alt="">
+        <img class="control-button__asset" :src="previousAssetUrl" alt="">
         <span class="control-text">上一方</span>
       </button>
 
@@ -45,7 +52,7 @@ const emit = defineEmits<{
         title="自动旋转"
         @click="emit('toggle-auto-rotate')"
       >
-        <img class="control-button__icon" src="/assets/ui/autoRotate.png" alt="">
+        <img class="control-button__icon" :src="autoRotateAssetUrl" alt="">
         <span class="control-text">自动旋转</span>
       </button>
 
@@ -58,7 +65,7 @@ const emit = defineEmits<{
         :title="fullscreen ? '退出全屏' : '进入全屏'"
         @click="emit('toggle-fullscreen')"
       >
-        <img class="control-button__icon" src="/assets/ui/FullScreen.png" alt="">
+        <img class="control-button__icon" :src="fullscreenAssetUrl" alt="">
         <span class="control-text">{{ fullscreen ? '退出全屏' : '全屏' }}</span>
       </button>
 
@@ -70,7 +77,7 @@ const emit = defineEmits<{
         title="下一方"
         @click="emit('next')"
       >
-        <img class="control-button__asset" src="/assets/ui/SwitchRight.png" alt="">
+        <img class="control-button__asset" :src="nextAssetUrl" alt="">
         <span class="control-text">下一方</span>
       </button>
     </div>

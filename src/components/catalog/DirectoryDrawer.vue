@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { CatalogItemSummary } from '@/domain/catalog/types'
+import { resolveAssetUrl } from '@/services/assetUrl'
+
+const backArrowAssetUrl = resolveAssetUrl('/assets/ui/backArrow.png')
 
 defineProps<{
   open: boolean
@@ -22,7 +25,7 @@ const emit = defineEmits<{
       <aside class="directory-drawer" aria-label="砚台目录">
         <header class="directory-header">
           <button class="directory-back" type="button" aria-label="关闭目录" @click="emit('close')">
-            <img src="/assets/ui/backArrow.png" alt="">
+            <img :src="backArrowAssetUrl" alt="">
             <span>关闭</span>
           </button>
         </header>
