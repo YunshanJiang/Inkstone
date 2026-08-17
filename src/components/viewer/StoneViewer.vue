@@ -86,6 +86,9 @@ watch(phase, (nextPhase) => emit('phase-change', nextPhase), { immediate: true }
     :aria-busy="phase === 'loading'"
   >
     <div class="viewer-stage">
+      <!-- Keep the complete orbit gesture on the model surface. `pan-y` lets
+           mobile browsers take over vertical drags for page scrolling, which
+           makes the model feel limited to left/right rotation. -->
       <model-viewer
         v-if="session.shouldMountModel.value"
         :ref="setViewerElement"
@@ -102,7 +105,7 @@ watch(phase, (nextPhase) => emit('phase-change', nextPhase), { immediate: true }
         auto-rotate-delay="0"
         rotation-per-second="18deg"
         camera-controls
-        touch-action="pan-y"
+        touch-action="none"
         loading="eager"
         reveal="auto"
       />

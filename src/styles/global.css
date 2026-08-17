@@ -16,8 +16,8 @@
   --gold-light: #f3d19a;
   --line-dark: rgba(236, 224, 201, 0.16);
   --line-paper: rgba(75, 57, 37, 0.18);
-  --font-display: "STKaiti", "KaiTi", "FangSong", "Songti SC", "STSong", serif;
-  --font-body: "Avenir Next", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --font-display: "LXGW WenKai", "STKaiti", "KaiTi", "FangSong", "Songti SC", "STSong", serif;
+  --font-body: "LXGW WenKai", "Avenir Next", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -38,6 +38,8 @@ html {
   min-width: 320px;
   min-height: 100%;
   background: var(--ink-950);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
