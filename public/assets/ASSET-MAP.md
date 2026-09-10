@@ -8,7 +8,7 @@
 | `/assets/fallback/YT-0001.png` | `Assets/Inkstone1/fallbackImage.png` | — | `fallbackImage`，仅 GLB 确认失败后显示 |
 | `/assets/models/YT-0002.glb` | 开发交付文件 `model3.fbx.glb` | — | `YT-0002` 的新模型；项目副本为贴图增加了相对 URI 和 PBR 材质绑定，几何数据不变 |
 | `/assets/models/YT-0002/diffuse.png` | 开发交付文件 `diffuse.png` | — | `YT-0002` 的基础色贴图，由 GLB 以相对路径引用 |
-| `/assets/models/YT-0002/roughness.png` | 开发交付文件 `Substance_graph_roughness.png` | — | `YT-0002` 的粗糙度贴图，绑定到 glTF `metallicRoughnessTexture` 的绿色通道 |
+| `/assets/models/YT-0002/roughness.png` | 开发交付文件 `Substance_graph_roughness.png` | — | 保留文件；已移除 GLB 引用，运行时不请求，使用固定粗糙度 1 |
 | `/assets/models/YT-0002/normal.png` | 开发交付文件 `Substance_graph_normal.png` | — | `YT-0002` 的法线贴图，由 GLB 以相对路径引用 |
 | `/assets/fallback/YT-0002.png` | `public/assets/fallback/YT-0001.png`（测试副本） | — | `YT-0002` 的 `fallbackImage`，与 YT-0001 相同替换图 |
 | `/assets/ui/backArrow.png` | `Assets/UIElement/backArrow.png` | `design-assets/ui/inkstone-directory-back-arrow-transparent.png` | 目录抽屉返回展示 |

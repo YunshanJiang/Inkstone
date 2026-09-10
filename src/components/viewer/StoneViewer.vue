@@ -75,7 +75,6 @@ const centeredCameraOrbit = computed(() => {
 })
 const fieldOfView = computed(() => props.item?.view?.fieldOfView || '30deg')
 const exposure = computed(() => props.item?.view?.exposure ?? 1)
-const shadowIntensity = computed(() => props.item?.view?.shadowIntensity ?? 0.8)
 const interactiveFieldOfView = ref('30deg')
 const interactiveCameraTarget = ref('0m 0m 0m')
 const pivotSource = ref<'pending' | 'volume' | 'bounds'>('pending')
@@ -92,7 +91,7 @@ let rotationInterpolationTimestamp: number | null = null
 const ORBIT_DEGREES_PER_PIXEL = 0.45
 const DRAG_INTERPOLATION_RESPONSE = 22
 const ROTATION_SETTLE_RADIANS = 0.0005
-const MIN_FIELD_OF_VIEW = 12
+const MIN_FIELD_OF_VIEW = 3
 const MAX_FIELD_OF_VIEW = 60
 const MIN_PINCH_DISTANCE = 8
 const AUTO_ROTATE_DEGREES_PER_SECOND = 18
@@ -524,7 +523,8 @@ onBeforeUnmount(() => {
         :field-of-view="interactiveFieldOfView"
         :data-pivot-source="pivotSource"
         :exposure="exposure"
-        :shadow-intensity="shadowIntensity"
+        :min-field-of-view="`${MIN_FIELD_OF_VIEW}deg`"
+        shadow-intensity="0"
         touch-action="none"
         loading="eager"
         reveal="auto"
